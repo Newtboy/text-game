@@ -349,7 +349,7 @@ def room_intro(room_name, rooms_dict):
             print_slow("A cloaked figure stands before you:")
             print_sorcerer_art()
             print_slow("The sorcerer speaks:")
-            print_slow("Greetings, traveler. I am the ancient     sorcerer. What brings you to this place?")
+            print_slow("Greetings, traveler. I am the ancient sorcerer. What brings you to this place?")
         
             # Call the sorcerer_conversation function here
             sorcerer_conversation()

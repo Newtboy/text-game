@@ -18,7 +18,7 @@ death_messages = [
     "Wow that whale was certainly something!",
     "sucks to suck",
     "kill yourself- oh wait.",
-    "Congrats! That was probably best best part of your life, the end.",
+    "Congrats! That was probably best part of your life, the end.",
     "    anoy anoy anoy",
     "give me soup or give me death",
     "Ya mums' a hoe",
@@ -251,6 +251,33 @@ has_lantern = False
 player_gold = 0
 player_health = 100
 
+def add_item_to_inventory(item):
+    player["inventory"].append(item)
+    console.set_color(255,215,0)
+    print(item + " has been added to your inventory.")
+    console.set_color()
+
+def remove_item(item):
+    player["inventory"].remove(item)
+    print(item + " has been removed from your inventory.")
+
+def has_item(item):
+    return item in player["inventory"]
+
+def display_gold():
+    print("Gold:", player["gold"])
+
+def display_health():
+    print("Health:", player["health"])
+
+def main():
+    player["name"] = input("Enter your name: ")
+    print("Welcome,", player["name"])
+
+    while True:
+        choice = input("Enter your choice: ")
+
+
 def print_slow(text, delay=0.03):
     for char in text:
         sys.stdout.write(char)
@@ -267,6 +294,48 @@ def die():
     console.set_color()
     sys.exit(0)
 
+def sorcerer_conversation():
+    working_words = [
+        "adventure"
+    ]  # List to store the working words
+    attempts = 0  # Number of times the player has attempted to respond
+
+    while True:
+        response = input("Enter your response: ").lower()
+
+        if "adventure" in response:
+            print_slow("Ah, an adventurer seeking mysteries! I might have a task for you...")
+            print_slow("But before I proceed, I must know if you are honest.")
+            honesty_response = input("Are you an honest person? (yes/no): ").lower()
+
+            if honesty_response == "yes":
+                print_slow("Very well. I shall reward your honesty.")
+                print_slow("The sorcerer hands you a simple lantern.")
+                add_item_to_inventory("lantern")
+                break
+            else:
+                print_slow("I sense deceit in your words. Choose your next words wisely.")
+                print_slow("I offer you a powerful potion, but it will cost you more than you think.")
+                gold_response = input("Do you accept this offer? (yes/no): ").lower()
+
+                if gold_response == "yes":
+                    global player_health
+                    player_health = -1
+                else:
+                    print_slow("Very wise. Beware of dishonesty.")
+                    player_health = 0
+                break
+        else:
+            attempts += 1
+
+            if attempts < 3:
+                print_slow("What? You need to speak up.")
+            else:
+                hint = ", ".join(working_words)
+                print_slow(f"What? You need to speak up. ({hint})")
+
+
+
 def room_intro(room_name, rooms_dict):
     global met_sorcerer
     global player_gold
@@ -280,37 +349,17 @@ def room_intro(room_name, rooms_dict):
             print_slow("A cloaked figure stands before you:")
             print_sorcerer_art()
             print_slow("The sorcerer speaks:")
-            print_slow("Greetings, traveler. I am the ancient sorcerer. What brings you to this place?")
-            response = input("Enter your response: ").lower()
+            print_slow("Greetings, traveler. I am the ancient     sorcerer. What brings you to this place?")
+        
+            # Call the sorcerer_conversation function here
+            sorcerer_conversation()
 
-            if "adventure" in response:
-                print_slow("Ah, an adventurer seeking mysteries! I might have a task for you...")
-                print_slow("But before I proceed, I must know if you are honest.")
-                honesty_response = input("Are you an honest person? (yes/no): ").lower()
-
-                if honesty_response == "yes":
-                    print_slow("Very well. I shall reward your honesty.")
-                    print_slow("The sorcerer hands you a simple lantern.")
-                    has_lantern = True
-                else:
-                    print_slow("I sense deceit in your words. Choose your next words wisely.")
-                    print_slow("I offer you a powerful potion, but it will cost you more than you think.")
-                    gold_response = input("Do you accept this offer? (yes/no): ").lower()
-
-                    if gold_response == "yes":
-                        global player_health
-                        player_health = -1   # Indicate player's death
-                    else:
-                        print_slow("Very wise. Beware of dishonesty.")
-                        player_health = 0  # Reset player's health to 0
-
-                # Set met_sorcerer to True to prevent the sorcerer's introduction from repeating
-                met_sorcerer = True
-            else:
-                print_slow("What? You need to speak up.")
+            # Set met_sorcerer to True to prevent the sorcerer's introduction from repeating
+            met_sorcerer = True
         else:
             print_slow("The sorcerer stands before you.")
-            
+        
+        
     elif room_name == "fiery_death":
         if not rooms_dict[room_name].get("entered"):
             player_health = -1
@@ -339,7 +388,7 @@ def room_intro(room_name, rooms_dict):
 
         if action == "search":
             search_chance = random.random()
-            if search_chance < 0.2:
+            if search_chance > 0.2:
                 print_slow("You discover a loose floorboard beneath the rug.")
                 print_slow("Upon lifting the floorboard, you find a hidden hatch.")
                 print_slow("Would you like to enter the hatch? (yes/no)")
@@ -468,80 +517,6 @@ player = {
     "health": 100
 }
 
-def print_inventory():
-    if player["inventory"]:
-        print("Inventory:")
-        for item in player["inventory"]:
-            print(item)
-    else:
-        print("Inventory is empty")
-
-def add_item_to_inventory(item):
-    player["inventory"].append(item)
-    print(item + " has been added to the inventory.")
-
-def sell_item(item, gold_value):
-    if item in player["inventory"]:
-        player["inventory"].remove(item)
-        player["gold"] += gold_value
-        print("Sold " + item + " for " + str(gold_value) + " gold.")
-    else:
-        print("Player does not possess " + item)
-
-def remove_item(item):
-    player["inventory"].remove(item)
-    print(item + " has been removed from the inventory.")
-
-def has_item(item):
-    return item in player["inventory"]
-
-def display_gold():
-    print("Gold:", player["gold"])
-
-def display_health():
-    print("Health:", player["health"])
-
-def main():
-    player["name"] = input("Enter your name: ")
-    print("Welcome,", player["name"])
-
-    while True:
-        print("\n1 - Print Inventory")
-        print("2 - Add Item to Inventory")
-        print("3 - Remove Item from Inventory")
-        print("4 - Check for Item in Inventory")
-        print("5 - Display Gold")
-        print("6 - Display Health")
-        print("0 - Exit")
-        choice = input("Enter your choice: ")
-
-        if choice == "1":
-            print_inventory()
-        elif choice == "2":
-            item = input("Enter the item to add to inventory: ")
-            add_item_to_inventory(item)
-        elif choice == "3":
-            item = input("Enter the item to remove from inventory: ")
-            remove_item(item)
-        elif choice == "4":
-            item = input("Enter the item to check for: ")
-            if has_item(item):
-                print("Player has", item, "in inventory.")
-            else:
-                print("Player does not have", item, "in inventory.")
-        elif choice == "5":
-            display_gold()
-        elif choice == "6":
-            display_health()
-        elif choice == "0":
-            print("Exiting the inventory system.")
-            break
-        else:
-            print("Invalid choice. Try again.")
-
-if __name__ == "__main__":
-    main()
-
 def play_game(rooms_dict):
     global player_health
     player_health = 100
@@ -569,7 +544,9 @@ def play_game(rooms_dict):
         
         if player_health <= 0:
             death_message = random.choice(death_messages)
+            console.set_color(255, 0, 0)  # Set the color to red
             print(print_game_over)
+            console.set_color()  # Reset the color
             print_slow(death_message)
             break
         
@@ -625,8 +602,13 @@ def play_game(rooms_dict):
         else:
             print_slow("What would you like to do?")
             action = input("> ").lower()
+            
+            if action == "gold":
+                display_gold()
+            elif action == "health":
+                display_health()
         
-            if action in rooms_dict[current_room]['exits']:
+            elif action in rooms_dict[current_room]['exits']:
                 current_room = rooms_dict[current_room]['exits'][action]
             elif action == "debug":
                 print("Available rooms:")

@@ -273,28 +273,28 @@ in_interaction = False
 def add_item_to_inventory(item):
     player["inventory"].append(item)
     console.set_color(255,215,0)
-    print(item + " has been added to your inventory.")
+    print((item + " has been added to your inventory."))
     console.set_color()
 
 def remove_item(item):
     player["inventory"].remove(item)
-    print(item + " has been removed from your inventory.")
+    print((item + " has been removed from your inventory."))
 
 def has_item(item):
     return item in player["inventory"]
 
 def display_gold():
-    print("Gold:", player["gold"])
+    print(("Gold:", player["gold"]))
 
 def display_health():
-    print("Health:", player["health"])
+    print(("Health:", player["health"]))
 
 def main():
-    player["name"] = input("Enter your name: ")
-    print("Welcome,", player["name"])
+    player["name"] = eval(input("Enter your name: "))
+    print(("Welcome,", player["name"]))
  
     while True:
-        choice = input("Enter your choice: ")
+        choice = eval(input("Enter your choice: "))
 
 def initial_interaction():
     global in_interaction
@@ -640,7 +640,7 @@ def play_game(rooms_dict):
             print_slow("You collected {} gold pieces.".format(player_gold))
             break
         elif room_name == "treasure_room":
-            print(rooms[room_name]["description"])
+            print((rooms[room_name]["description"]))
             action = input("> ").lower()
         
             if action == "search":
@@ -697,8 +697,8 @@ def play_game(rooms_dict):
             elif action == "debug":
                 print("Available rooms:")
                 for room_name in rooms_dict:
-                    print("- " + room_name)
-                chosen_room = input("Enter the name of the room: ")
+                    print(("- " + room_name))
+                chosen_room = eval(input("Enter the name of the room: "))
                 if chosen_room in rooms_dict:
                     current_room = chosen_room
                 else:

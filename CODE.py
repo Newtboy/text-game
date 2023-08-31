@@ -363,7 +363,6 @@ def sorcerer_conversation():
                 gold_response = input("Do you accept this offer? (yes/no): ").lower()
 
                 if gold_response == "yes":
-                    global player_health
                     player_health = -1
                     break
                 else:
@@ -702,8 +701,9 @@ def play_game(rooms_dict):
                 print("Available rooms:")
                 for room_name in rooms_dict:
                     print(("- " + room_name))
-                chosen_room = room_intro(input("Enter the name of the room: "), rooms_dict)
+                chosen_room = input("Enter the name of the room: ")
                 if chosen_room in rooms_dict:
+                    room_intro(chosen_room, rooms_dict)
                     current_room = chosen_room
                     continue
                 else:

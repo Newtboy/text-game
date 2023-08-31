@@ -5,7 +5,7 @@ import sound
 import console
 
 
-death_messages = [
+death_messages_1 = [
     "You fool! You shouldn't have died yet!",
     "The story cannot continue....",
 """                     __       __
@@ -26,6 +26,25 @@ death_messages = [
     "How the Hell DID YOU DIE, THIS IS EASY",
     "Congratulations. You played yourself."
 ]
+
+death_messages_2 = [
+    "You fool! You shouldn't have died yet!",
+    "The story cannot continue....",
+"""                     __       __
+                     '.'--.--'.-'
+       .,_------.___,   \' r'
+       ', '-._a      '-' .'
+        '.    '-'Y \._  /
+          '--;____'--.'-,
+           /..'       '''""",    
+    "Wow that whale was certainly something!",
+    "    anoy anoy anoy",
+    "give me soup or give me death",
+    "Suprise!",
+    "How DID YOU DIE? THIS IS EASY!",
+    "Congratulations. You played yourself."
+]
+
 # Define the rooms and their  properties
 rooms = {
     "start": {
@@ -193,13 +212,13 @@ rooms = {
             "exit": "cottage_interior"
         }
     },
-        "dragon_lair": {
-        "description": "You enter a massive cavern, and at its center, a fearsome dragon rests on a pile of gold.",
-        "exits": {
-            "back": "cave_tunnel",
-            "talk": "dragon_conversation"
-        }
-    },
+"dragon_lair": {
+    "description": "You enter a massive cavern, and at its center, a fearsome dragon rests on a pile of gold.",
+    "exits": {
+        "back": "cave_tunnel",
+        "speak": "dragon_conversation"
+    }
+},
 
     "dragon_conversation": {
         "description": "The dragon speaks, its voice rumbling like thunder. It offers you a choice: answer a riddle or face its fiery breath.",
@@ -210,7 +229,7 @@ rooms = {
     },
 
     "dragon_riddle": {
-        "description": "The dragon presents its riddle: 'I speak without a mouth and hear without ears. I have no body, but I come alive with the wind. What am I?'",
+        "description": "",
         "exits": {
             "answer": "dragon_riddle_answer",
             "back": "dragon_conversation"
@@ -250,6 +269,7 @@ met_sorcerer = False
 has_lantern = False
 player_gold = 0
 player_health = 100
+in_interaction = False
 
 def add_item_to_inventory(item):
     player["inventory"].append(item)
@@ -273,10 +293,24 @@ def display_health():
 def main():
     player["name"] = input("Enter your name: ")
     print("Welcome,", player["name"])
-
+ 
     while True:
         choice = input("Enter your choice: ")
 
+def initial_interaction():
+    global in_interaction
+    global player_health
+    
+    print_slow("Welcome to the adventure! Before we begin, I have a couple of questions for you.")
+    teacher_response = input("Are you a teacher? (yes/no): ").lower()
+    age_response = input("Are you under 15 years old? (yes/no): ").lower()
+    
+    if teacher_response == "yes" or age_response == "yes":
+        print_slow("Thank you for your input. The game now doesn't contain offensive/inappropriate material, so I can't get in trouble. Also, you aren't missing anything but a few inappropriate jokes.")
+        return False
+    else:
+        print_slow("Thank you for your input. The game will continue as normal.")
+        return True
 
 def print_slow(text, delay=0.03):
     for char in text:
@@ -287,12 +321,17 @@ def print_slow(text, delay=0.03):
     print("")
 
 def die():
-    player_health = -1
-    death_message = random.choice(death_messages)
-    console.set_color(100,0,0)
-    print_slow(death_message)
-    console.set_color()
-    sys.exit(0)
+    if in_interaction == False:
+        player_health = -1
+        death_message = random.choice(death_messages)
+        sys.exit(0)
+    else:
+        player_health = -1
+        death_message = random.choice(death_messages)
+        console.set_color(100,0,0)
+        print_slow(death_message)
+        console.set_color()
+        sys.exit(0)
 
 def sorcerer_conversation():
     working_words = [
@@ -334,17 +373,62 @@ def sorcerer_conversation():
                 hint = ", ".join(working_words)
                 print_slow(f"What? You need to speak up. ({hint})")
 
+def dragon_conversation():
+    working_words = ["gold", "treasure"]
+    attempts = 0
+
+    while True:
+        response = input("Enter your response: ").lower()
+
+        if "gold" in response or "treasure" in response:
+            print_slow("A fierce dragon looks at you with curiosity:")
+            print_slow("The dragon speaks:")
+            print_slow("You seek gold and treasure, do you?")
+            response = input("Enter your response: ").lower()
+
+            if "yes" in response:
+                print_slow("Very well, mortal. But what will you offer in return?")
+                offering_response = input("Enter your offering: ").lower()
+
+                if "sword" in offering_response:
+                    print_slow("A sword, you say? Interesting...")
+                    print_slow("The dragon accepts your offering and leads you to its hoard of gold.")
+                    player_gold += 100
+                    console.set_color(255, 215, 0)
+                    print("You got 100 gold!")
+                else:
+                    print_slow("Your offering does not interest me. Begone!")
+                    return False  # Indicate failure
+            else:
+                print_slow("Hmmm, your hesitation speaks volumes.")
+                return False  # Indicate failure
+        else:
+            attempts += 1
+
+            if attempts < 2:
+                print_slow("What? You need to speak up.")
+            elif attempts < 3:
+                hint = ", ".join(working_words)
+                print_slow(f"What? You need to speak up. ({hint})")
+            else:
+                print_slow("The dragon's eyes narrow. 'Incorrect,' it says. 'Prepare for a challenge.'")
+                return False  # Indicate failure
+
+# In your main game loop:
 
 
 def room_intro(room_name, rooms_dict):
     global met_sorcerer
     global player_gold
     global has_lantern
+    global player_health
 
     print_slow(rooms_dict[room_name]['description'])
     print_valid_moves(room_name, rooms_dict)
-
-    if room_name == "strange_clearing":
+    
+    if room_name == "dragon_lair" and "speak" in rooms_dict[room_name]['exits']:
+        room_intro("dragon_conversation", rooms_dict)
+    elif room_name == "strange_clearing":
         if not met_sorcerer:
             print_slow("A cloaked figure stands before you:")
             print_sorcerer_art()
@@ -372,13 +456,7 @@ def room_intro(room_name, rooms_dict):
         else:
             print_slow("That area does not exist.")
     elif room_name == "dragon_riddle":
-        answer = input("Enter your answer: ").lower()
-        if answer == "stupid":
-            print_slow("The dragon nods approvingly. 'Correct,' it says. 'You may have some of my gold, but don't come back.'")
-            rooms_dict["dragon_riddle"]["exits"]["answer"] = "dragon_riddle_answer"
-        else:
-            print_slow("The dragon's eyes narrow. 'Incorrect,' it says. 'Prepare for a challenge.'")
-            player_health = -1
+        dragon_conversation()
     elif room_name == "cottage_interior":
         print_slow("You are in the cozy interior of the old cottage.")
         action = input("What would you like to do? ").lower()
@@ -504,7 +582,9 @@ def search_secret_treasure():
         print_slow("You discover a hidden lever that opens a secret passage!")
         gold_found = random.randint(15, 30)
         player_gold += gold_found
-        print_slow("You found a secret treasure area and collected {} gold pieces.".format(gold_found))
+        console.set_color(255,215,0)
+        print_slow("You found a secret treasure area and collected {} gold!".format(gold_found))
+        console.set_color()
         global found_secret_treasure
         found_secret_treasure = True
     else:
@@ -531,24 +611,29 @@ def play_game(rooms_dict):
     current_room = "start"
     
     player = {
-    "current_room": "entrance",
+    "current_room": "start",
     "health": 100,
-    "inventory": [],
-    # ... other player attributes ...
-}
-    
+    "inventory": []
+    }
+
+
     while True:
-        room_name = player["current_room"]
+        room_name = current_room
         if player_health > 0:
-            room_intro(current_room, rooms_dict)
-        
+            room_intro(room_name, rooms_dict)
+    
         if player_health <= 0:
-            death_message = random.choice(death_messages)
-            console.set_color(255, 0, 0)  # Set the color to red
-            print(print_game_over)
-            console.set_color()  # Reset the color
-            print_slow(death_message)
-            break
+            if in_interaction == False:
+                death_message = random.choice(death_messages_1)
+                print_slow(death_message)
+                break
+            else:
+                death_message = random.choice(death_messages_2)
+                console.set_color(255, 0, 0)  # Set the color to red
+                print(print_game_over)
+                console.set_color()  # Reset the color
+                print_slow(death_message)
+                break
         
         
         if current_room == "end":
@@ -629,4 +714,5 @@ def play_game(rooms_dict):
 
 if __name__ == "__main__":
     print_slow("Welcome to the Text Adventure Game!")
+    initial_interaction()
     play_game(rooms)

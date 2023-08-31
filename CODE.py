@@ -205,20 +205,26 @@ rooms = {
             "exit": "old_cottage"
         }
     },
+    "old_cottage": {
+        "description": "You keep walking and find an old cottage. It's pretty worn down, but still standing.",
+        "exits": {
+            "enter": "cottage_interior",
+            "back": "strange_clearing"
+        }
+    },
     "old_mineshaft": {
         "description": "You go down the trapdoor, but it is too dark to see.",
         "exits": {
             "exit": "cottage_interior"
         }
     },
-"dragon_lair": {
-    "description": "You enter a massive cavern, and at its center, a fearsome dragon rests on a pile of gold.",
-    "exits": {
-        "back": "cave_tunnel",
-        "speak": "dragon_conversation"
-    }
-},
-
+    "dragon_lair": {
+        "description": "You enter a massive cavern, and at its center, a fearsome dragon rests on a pile of gold.",
+        "exits": {
+            "back": "cave_tunnel",
+            "speak": "dragon_conversation"
+        }
+    },
     "dragon_conversation": {
         "description": "The dragon speaks, its voice rumbling like thunder. It offers you a choice: answer a riddle or face its fiery breath.",
         "exits": {
@@ -359,10 +365,10 @@ def sorcerer_conversation():
                 if gold_response == "yes":
                     global player_health
                     player_health = -1
+                    break
                 else:
                     print_slow("Very wise. Beware of dishonesty.")
-                    player_health = 0
-                break
+                    break
         else:
             attempts += 1
 
@@ -444,9 +450,7 @@ def room_intro(room_name, rooms_dict):
         
         
     elif room_name == "fiery_death":
-        if not rooms_dict[room_name].get("entered"):
-            player_health = -1
-            rooms_dict[room_name]["entered"] = True
+        player_health = -1
     
     elif room_name == "debug":
         new_room_name = input("Enter the name of the area you want to enter: ").lower()
@@ -495,22 +499,22 @@ def print_valid_moves(room_name, rooms_dict):
 def print_sorcerer_art():
     sorcerer_art = """
               _,._
-  .||,       /_ _\\
- \.`',/      |'L'| |
+  .||,       /_ _\\\\
+ \\.`',/      |'L'| |
  = ,. =      | -,| L
- / || \    ,-'\"/,'`.
+ / || \\    ,-'\\"/,'`.
    ||     ,'   `,,. `.
-   ,|____,' , ,;' \| |
-  (3|\    _/|/'   _| |
+   ,|____,' , ,;' \\| |
+  (3|\\    _/|/'   _| |
    ||/,-''  | >-'' _,\\
-   ||'      ==\ ,-'  ,'
-   ||       |  V \ ,|
+   ||'      ==\\ ,-'  ,'
+   ||       |  V \\ ,|
    ||       |    |` |
    ||       |    |   \\
-   ||       |    \    \\
+   ||       |    \\    \\
    ||       |     |    \\
-   ||       |      \_,-'
-   ||       |___,,--")_\
+   ||       |      \\_,-'
+   ||       |___,,--")_\\
    ||         |_|   ccc/
    ||        ccc/
    ||
@@ -698,11 +702,13 @@ def play_game(rooms_dict):
                 print("Available rooms:")
                 for room_name in rooms_dict:
                     print(("- " + room_name))
-                chosen_room = eval(input("Enter the name of the room: "))
+                chosen_room = room_intro(input("Enter the name of the room: "), rooms_dict)
                 if chosen_room in rooms_dict:
                     current_room = chosen_room
+                    continue
                 else:
                     print("Invalid room name.")
+                    break
             elif action == "die":
                 player_health = -1
                 continue

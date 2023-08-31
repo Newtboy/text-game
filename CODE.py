@@ -1,7 +1,6 @@
 import sys
 import time
 import random
-import sound
 import console
 
 
@@ -323,11 +322,11 @@ def print_slow(text, delay=0.03):
 def die():
     if in_interaction == False:
         player_health = -1
-        death_message = random.choice(death_messages)
+        death_message = random.choice(death_messages_1)
         sys.exit(0)
     else:
         player_health = -1
-        death_message = random.choice(death_messages)
+        death_message = random.choice(death_messages_2)
         console.set_color(100,0,0)
         print_slow(death_message)
         console.set_color()
@@ -515,7 +514,7 @@ def print_sorcerer_art():
    ||         |_|   ccc/
    ||        ccc/
    ||
-        """.strip()
+        """
     print(sorcerer_art)
 print_game_over = """
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡤⠖⠛⣻⣿⣻⣿⣿⣶⠶⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀

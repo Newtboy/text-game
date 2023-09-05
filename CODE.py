@@ -3,6 +3,7 @@ import time
 import random
 import console
 
+beta_features = False
 
 death_messages_1 = [
     "You fool! You shouldn't have died yet!",
@@ -301,7 +302,7 @@ def main():
  
     while True:
         choice = eval(input("Enter your choice: "))
-
+in_interaction = True
 def initial_interaction():
     global in_interaction
     global player_health
@@ -363,7 +364,7 @@ def sorcerer_conversation():
                 gold_response = input("Do you accept this offer? (yes/no): ").lower()
 
                 if gold_response == "yes":
-                    player_health = -1
+                    kill_player()
                     break
                 else:
                     print_slow("Very wise. Beware of dishonesty.")
@@ -599,6 +600,17 @@ player = {
     "health": 100
 }
 
+def kill_player():
+    if in_interaction == False:
+        death_message = random.choice(death_messages_1)
+        print_slow(death_message)
+    else:
+        death_message = random.choice(death_messages_2)
+        console.set_color(255, 0, 0)  # Set the color to red
+        print(print_game_over)
+        console.set_color()  # Reset the color
+        print_slow(death_message)
+
 def play_game(rooms_dict):
     global player_health
     player_health = 100
@@ -705,7 +717,7 @@ def play_game(rooms_dict):
                 if chosen_room in rooms_dict:
                     room_intro(chosen_room, rooms_dict)
                     current_room = chosen_room
-                    continue
+                    break
                 else:
                     print("Invalid room name.")
                     break
@@ -719,5 +731,6 @@ def play_game(rooms_dict):
 
 if __name__ == "__main__":
     print_slow("Welcome to the Text Adventure Game!")
-    initial_interaction()
+    if beta_features == True:
+        initial_interaction()
     play_game(rooms)

@@ -730,6 +730,9 @@ def play_game(rooms_dict):
                 continue
 
 if __name__ == "__main__":
+    console.set_color(255,0,0)
+    print("WARNING: THIS GAME IS IN EARLY BETA. EXPECT BUGS AND SEQUENCE BREAKS.")
+    console.set_color()
     print_slow("Welcome to the Text Adventure Game!")
     if beta_features == True:
         initial_interaction()

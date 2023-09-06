@@ -4,6 +4,7 @@ import random
 import console
 
 beta_features = False
+dev_features = True
 
 death_messages_1 = [
     "You fool! You shouldn't have died yet!",
@@ -169,10 +170,6 @@ rooms = {
             "back": "start"
         }
     },
-    "debug": {
-    "description": "You are in the debug room.",
-    "exits": {}
-    },
     "cave_entrance": {
         "description": "Inside the cave, the air is damp and echoes with distant sounds.",
         "exits": {
@@ -222,43 +219,17 @@ rooms = {
     "dragon_lair": {
         "description": "You enter a massive cavern, and at its center, a fearsome dragon rests on a pile of gold.",
         "exits": {
-            "back": "cave_tunnel",
-            "speak": "dragon_conversation"
+            "speak": "dragon_placeholder"
         }
     },
-    "dragon_conversation": {
-        "description": "The dragon speaks, its voice rumbling like thunder. It offers you a choice: answer a riddle or face its fiery breath.",
-        "exits": {
-            "riddle": "dragon_riddle",
-            "fiery_breath": "fiery_death"
-        }
-    },
-
     "dragon_riddle": {
         "description": "",
-        "exits": {
-            "answer": "dragon_riddle_answer",
-            "back": "dragon_conversation"
-        }
+        "exits": {}
     },
-
-    "dragon_riddle_answer": {
-        "description": "The dragon stares, then starts to chuckle. The laugher gets louder and more hearty. It laughs so hard it decides to not kill you immediately.",
-        "exits": {
-            "back": "dragon_conversation"
-        }
-    },
-
     "fiery_death": {
         "description": "The dragon's fiery breath engulfs you, and your journey comes to a sudden and unfortunate end.",
         "exits": {},
-        "actions": [
-            {
-                "on_enter": {
-                    "command": "die"
-                }
-            }
-        ]
+
     },
     "end": {
         "description": "You have reached the end of your journey.",
@@ -267,7 +238,7 @@ rooms = {
 }
 
 
-enemy_rooms = ["deep_forest", "treasure_room"]  # Add other enemy rooms here
+enemy_rooms = ["deep_forest", "treasure_room"]
 defeated_enemies = {}
 searched_abandoned_house = False
 found_secret_treasure = False
@@ -359,7 +330,7 @@ def sorcerer_conversation():
                 add_item_to_inventory("lantern")
                 break
             else:
-                print_slow("I sense deceit in your words. Choose your next words wisely.")
+                print_slow("I see.")
                 print_slow("I offer you a powerful potion, but it will cost you more than you think.")
                 gold_response = input("Do you accept this offer? (yes/no): ").lower()
 
@@ -383,11 +354,12 @@ def dragon_conversation():
     attempts = 0
 
     while True:
+        print_slow("A fierce dragon looks at you with curiosity.")
+        print_slow("The dragon speaks:")
+        print_slow("What brings you here to my lair?")
         response = input("Enter your response: ").lower()
 
         if "gold" in response or "treasure" in response:
-            print_slow("A fierce dragon looks at you with curiosity:")
-            print_slow("The dragon speaks:")
             print_slow("You seek gold and treasure, do you?")
             response = input("Enter your response: ").lower()
 
@@ -401,25 +373,24 @@ def dragon_conversation():
                     player_gold += 100
                     console.set_color(255, 215, 0)
                     print("You got 100 gold!")
+                    console.set_color()
                 else:
                     print_slow("Your offering does not interest me. Begone!")
-                    return False  # Indicate failure
+                    return False
             else:
                 print_slow("Hmmm, your hesitation speaks volumes.")
-                return False  # Indicate failure
+                return False 
         else:
             attempts += 1
 
             if attempts < 2:
                 print_slow("What? You need to speak up.")
-            elif attempts < 3:
+            elif attempts >= 3:
                 hint = ", ".join(working_words)
-                print_slow(f"What? You need to speak up. ({hint})")
+                print_slow("What? You need to speak up. ({hint})")
             else:
                 print_slow("The dragon's eyes narrow. 'Incorrect,' it says. 'Prepare for a challenge.'")
-                return False  # Indicate failure
-
-# In your main game loop:
+                kill_player() 
 
 
 def room_intro(room_name, rooms_dict):
@@ -431,33 +402,22 @@ def room_intro(room_name, rooms_dict):
     print_slow(rooms_dict[room_name]['description'])
     print_valid_moves(room_name, rooms_dict)
     
-    if room_name == "dragon_lair" and "speak" in rooms_dict[room_name]['exits']:
-        room_intro("dragon_conversation", rooms_dict)
-    elif room_name == "strange_clearing":
+    if room_name == "strange_clearing":
         if not met_sorcerer:
             print_slow("A cloaked figure stands before you:")
             print_sorcerer_art()
             print_slow("The sorcerer speaks:")
             print_slow("Greetings, traveler. I am the ancient sorcerer. What brings you to this place?")
         
-            # Call the sorcerer_conversation function here
             sorcerer_conversation()
 
-            # Set met_sorcerer to True to prevent the sorcerer's introduction from repeating
             met_sorcerer = True
         else:
             print_slow("The sorcerer stands before you.")
         
         
     elif room_name == "fiery_death":
-        player_health = -1
-    
-    elif room_name == "debug":
-        new_room_name = input("Enter the name of the area you want to enter: ").lower()
-        if new_room_name in rooms_dict:
-            current_room = new_room_name
-        else:
-            print_slow("That area does not exist.")
+        kill_player()
     elif room_name == "dragon_riddle":
         dragon_conversation()
     elif room_name == "cottage_interior":
@@ -643,7 +603,7 @@ def play_game(rooms_dict):
                 break
             else:
                 death_message = random.choice(death_messages_2)
-                console.set_color(255, 0, 0)  # Set the color to red
+                console.set_color(255,0,0)  # Set the color to red
                 print(print_game_over)
                 console.set_color()  # Reset the color
                 print_slow(death_message)
@@ -651,7 +611,9 @@ def play_game(rooms_dict):
         
         
         if current_room == "end":
+            console.set_color(0,255,0)
             print_slow("Congratulations! You have completed the game.")
+            console.set_color(255,215,0)
             print_slow("You collected {} gold pieces.".format(player_gold))
             break
         elif room_name == "treasure_room":
@@ -706,21 +668,35 @@ def play_game(rooms_dict):
                 display_gold()
             elif action == "health":
                 display_health()
-        
+            elif action == "gimmegold":
+                if dev_features == True:
+                    gold_gave = int(input("How much gold?:"))
+                    player_gold += gold_gave
+                    console.set_color(0,215,255)
+                    print("YOU HAVE GAINED", gold_gave, "ILLEGAL GOLD. THIS HAS BEEN MARKED ON YOUR GAME.")
+                    continue
+                elif dev_features == False:
+                    console.set_color(0,1,1)
+                    print("Lol I disabled that feature, why would I let the player use it?")
+                    console.set_color()
             elif action in rooms_dict[current_room]['exits']:
                 current_room = rooms_dict[current_room]['exits'][action]
             elif action == "debug":
-                print("Available rooms:")
-                for room_name in rooms_dict:
-                    print(("- " + room_name))
-                chosen_room = input("Enter the name of the room: ")
-                if chosen_room in rooms_dict:
-                    room_intro(chosen_room, rooms_dict)
-                    current_room = chosen_room
-                    break
-                else:
-                    print("Invalid room name.")
-                    break
+                if dev_features == True:
+                    print("Available rooms:")
+                    for room_name in rooms_dict:
+                        print(("- " + room_name))
+                    chosen_room = input("Enter the name of the room: ")
+                    if chosen_room in rooms_dict:
+                        current_room = chosen_room
+                        continue
+                    else:
+                        print("Invalid room name.")
+                        continue
+                elif dev_features == False:
+                    console.set_color(0,1,1)
+                    print("Lol I disabled that feature, why would I let the player use it?")
+                    console.set_color()
             elif action == "die":
                 player_health = -1
                 continue

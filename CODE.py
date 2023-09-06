@@ -46,7 +46,6 @@ death_messages_2 = [
     "Congratulations. You played yourself."
 ]
 
-# Define the rooms and their  properties
 rooms = {
     "start": {
         "description": "You find yourself in a dimly lit room. There are two doors ahead.",
@@ -56,10 +55,9 @@ rooms = {
         }
     },
     "right_hallway": {
-    "description": "You find yourself in a dimly lit hallway. The walls are adorned with faded tapestries.",
+    "description": "As you step through, you feel the door disappear. You find yourself in a dimly lit hallway. The walls are adorned with faded tapestries.",
     "exits": {
         "forward": "grand_foyer",
-        "back": "start"
     }
 },
 
@@ -143,10 +141,9 @@ rooms = {
     }
 },
     "dark_forest": {
-        "description": "You are in a dark forest. Moonlight barely filters through the thick canopy.",
+        "description": "As you step through the door, you feel it disappear behind you. You find yourself in a dark forest. Moonlight barely filters through the thick canopy.",
         "exits": {
             "forward": "deep_forest",
-            "back": "start"
         }
     },
     "deep_forest": {
@@ -313,8 +310,8 @@ def die():
 def sorcerer_conversation():
     working_words = [
         "adventure"
-    ]  # List to store the working words
-    attempts = 0  # Number of times the player has attempted to respond
+    ]  
+    attempts = 0  
 
     while True:
         response = input("Enter your response: ").lower()
@@ -566,9 +563,9 @@ def kill_player():
         print_slow(death_message)
     else:
         death_message = random.choice(death_messages_2)
-        console.set_color(255, 0, 0)  # Set the color to red
+        console.set_color(255, 0, 0)  
         print(print_game_over)
-        console.set_color()  # Reset the color
+        console.set_color()  
         print_slow(death_message)
 
 def play_game(rooms_dict):
@@ -583,6 +580,9 @@ def play_game(rooms_dict):
     global illegal_gold
     global illegal_teleport
     global used_cheat
+    illegal_gold = False
+    illegal_teleport = False
+    used_cheat = False
     player_gold = 0
     searched_treasure_room = False
     current_room = "start"
@@ -606,9 +606,9 @@ def play_game(rooms_dict):
                 break
             else:
                 death_message = random.choice(death_messages_2)
-                console.set_color(255,0,0)  # Set the color to red
+                console.set_color(255,0,0)  
                 print(print_game_over)
-                console.set_color()  # Reset the color
+                console.set_color()  
                 print_slow(death_message)
                 break
         
@@ -620,15 +620,20 @@ def play_game(rooms_dict):
             console.set_color(255,215,0)
             print_slow("You collected {} gold pieces.".format(player_gold))
             if used_cheat == True:
+                console.set_color(255,0,0)
+                print("used_cheat =", used_cheat)
                 print("You have used the following cheats:")
                 if illegal_gold == True:
                     console.set_color(255,0,0)
-                    print("CHEAT gimmegold WAS USED")
+                    print("gimmegold")
                 elif illegal_teleport == True:
                     console.set_color(255,0,0)
                     print("CHEAT debug WAS USED")
-                print("you filthy pig")
+                else:
+                    print("ERROR")
+                print("you dirty cheater")
                 console.set_color()
+                break
             break
         elif room_name == "treasure_room":
             print((rooms[room_name]["description"]))
@@ -653,7 +658,6 @@ def play_game(rooms_dict):
                     player_gold += random.randint(5, 15)
                     continue
             else:
-                # If player chooses to leave, move to the back exit
                 current_room = rooms_dict[current_room]['exits']['back']
                 continue
         elif current_room == "treasure_room" and not found_secret_treasure:

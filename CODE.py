@@ -580,6 +580,9 @@ def play_game(rooms_dict):
     global found_secret_treasure
     global met_sorcerer
     global has_lantern
+    global illegal_gold
+    global illegal_teleport
+    global used_cheat
     player_gold = 0
     searched_treasure_room = False
     current_room = "start"
@@ -613,8 +616,19 @@ def play_game(rooms_dict):
         if current_room == "end":
             console.set_color(0,255,0)
             print_slow("Congratulations! You have completed the game.")
+            console.set_color(255,0,0)
             console.set_color(255,215,0)
             print_slow("You collected {} gold pieces.".format(player_gold))
+            if used_cheat == True:
+                print("You have used the following cheats:")
+                if illegal_gold == True:
+                    console.set_color(255,0,0)
+                    print("CHEAT gimmegold WAS USED")
+                elif illegal_teleport == True:
+                    console.set_color(255,0,0)
+                    print("CHEAT debug WAS USED")
+                print("you filthy pig")
+                console.set_color()
             break
         elif room_name == "treasure_room":
             print((rooms[room_name]["description"]))
@@ -674,6 +688,8 @@ def play_game(rooms_dict):
                     player_gold += gold_gave
                     console.set_color(0,215,255)
                     print("YOU HAVE GAINED", gold_gave, "ILLEGAL GOLD. THIS HAS BEEN MARKED ON YOUR GAME.")
+                    illegal_gold = True
+                    used_cheat = True
                     continue
                 elif dev_features == False:
                     console.set_color(0,1,1)
@@ -683,6 +699,7 @@ def play_game(rooms_dict):
                 current_room = rooms_dict[current_room]['exits'][action]
             elif action == "debug":
                 if dev_features == True:
+                    illegal_teleport = True
                     print("Available rooms:")
                     for room_name in rooms_dict:
                         print(("- " + room_name))

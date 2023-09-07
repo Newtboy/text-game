@@ -270,6 +270,28 @@ def main():
  
     while True:
         choice = eval(input("Enter your choice: "))
+        room_name = current_room
+    action = None  # Initialize action here
+    
+    if player_health > 0:
+        room_intro(room_name, rooms_dict)
+    
+    if room_name == "elegant_study" and not found_hidden_passage:
+        print_slow("You ascend a grand staircase and enter an elegant study filled with shelves of books and intricate artifacts.")
+        print_slow("You notice a bookcase filled with ancient books.")
+        print_slow("- search")
+        
+        action = input("> ").lower()
+
+        if action == "search":
+            if random.random() < 0.2:  # Adjust the chance of success as needed
+                print_slow("You study the books in the bookcase and accidentally bump a figurine.")
+                print_slow("A click sounds from somewhere far off.")
+                found_hidden_passage = True  # Update the variable to allow access to the cave
+            else:
+                print_slow("You look at the books in the bookcase and find nothing but books about fairy tales of dragons.")
+    elif action in rooms[room_name]["exits"]:
+        player["current_room"] = rooms[room_name]["exits"][action]
 in_interaction = True
 def initial_interaction():
     global in_interaction
@@ -398,6 +420,7 @@ def room_intro(room_name, rooms_dict):
 
     print_slow(rooms_dict[room_name]['description'])
     print_valid_moves(room_name, rooms_dict)
+    action = None
     
     if room_name == "strange_clearing":
         if not met_sorcerer:
@@ -411,15 +434,42 @@ def room_intro(room_name, rooms_dict):
             met_sorcerer = True
         else:
             print_slow("The sorcerer stands before you.")
-        
-        
+    if room_name == "elegant_study":
+        print_slow("You ascend a grand staircase and enter an elegant study filled with shelves of books and intricate artifacts.")
+    
+    # Check if the player has already found the hidden passage
+        if found_hidden_passage:
+            print_valid_moves(room_name, rooms_dict)
+        else:
+            print_slow("You notice a bookcase filled with ancient books.")
+            print_slow("- search")
+    
+        action = input("> ").lower()
+
+        if action == "search" and not found_hidden_passage:
+            if random.random() < 0.2:  # Adjust the chance of success as needed
+                print_slow("You study the books in the bookcase and accidentally bump a figurine.")
+                print_slow("A click sounds from somewhere far off.")
+                found_hidden_passage = True  # Update the variable to allow access to the cave
+            else:
+                print_slow("You look at the books in the bookcase and find nothing but books about fairy tales of dragons.")
+    elif action in rooms[room_name]["exits"]:
+        player["current_room"] = rooms[room_name]["exits"][action]
+    
     elif room_name == "fiery_death":
         kill_player()
     elif room_name == "dragon_riddle":
         dragon_conversation()
+    elif room_name == "forgotten_chapel":
+        action = input("")
+        if action == "search":
+             search_chance = random.random()
+             if search_chance > 0.5:
+                 print_slow("You decide to search the dilapidated chapel, and find a false wall behind the altar.")
+             
     elif room_name == "cottage_interior":
         print_slow("You are in the cozy interior of the old cottage.")
-        action = input("What would you like to do? ").lower()
+        action = input("What would you like to do?").lower()
         
         if action == "die":
             die()
@@ -442,12 +492,16 @@ def room_intro(room_name, rooms_dict):
             else:
                 print_slow("You search the room but find nothing of interest.")
     
+no_enemy = [
+    "start",
+    "treasure_room",
+    "secret_treasure_room",
+    "end"
+]
 def print_valid_moves(room_name, rooms_dict):
     print_slow("Valid moves:")
     for exit_direction in rooms_dict[room_name]['exits']:
         print_slow("- " + exit_direction)
-    if room_name in enemy_rooms and not defeated_enemies.get(room_name):
-        print_slow("- fight")
     if room_name == "abandoned_house" and not searched_abandoned_house:
         print_slow("- search")
     if room_name == "treasure_room" and not found_secret_treasure:
@@ -557,6 +611,12 @@ player = {
     "health": 100
 }
 
+enemy_names = {
+    "Goblin": (20, 30),
+    "Orc": (30, 40),
+    "Troll": (40, 50),
+}
+
 def kill_player():
     if in_interaction == False:
         death_message = random.choice(death_messages_1)
@@ -567,6 +627,8 @@ def kill_player():
         print(print_game_over)
         console.set_color()  
         print_slow(death_message)
+
+encountered_rooms = {}
 
 def play_game(rooms_dict):
     global player_health
@@ -598,6 +660,15 @@ def play_game(rooms_dict):
         room_name = current_room
         if player_health > 0:
             room_intro(room_name, rooms_dict)
+        if current_room not in no_enemy and not encountered_rooms.get(room_name) and random.random() < 0.1:
+            enemy_name, (min_health, max_health) = random.choice(list(enemy_names.items()))
+            enemy_health = random.randint(min_health, max_health)
+            print_slow(f"An {enemy_name} suddenly attacks you!")
+            encountered_rooms[room_name] = True
+            if battle(player_health, enemy_health):
+                defeated_enemies[current_room] = True
+                player_gold += random.randint(5, 15)
+                continue
     
         if player_health <= 0:
             if in_interaction == False:
